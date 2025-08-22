@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, Res, Param } from '@nestjs/common';
 import { PaypalService } from './paypal.service';
 import { Response } from 'express';
 
@@ -58,5 +58,35 @@ export class PaypalController {
   @Get()
   cancelOrder(@Res() res: Response) {
     res.send('<h1>Payment cancelled by user</h1>');
+  }
+
+  // Store card in vault
+  @Post('vault')
+  async storeCard(
+    @Body()
+    body: {
+      customerId: string;
+      card: {
+        number: string;
+        expiry: string; // format: YYYY-MM
+        securityCode: string;
+        name: string;
+        billingAddress: {
+          addressLine1: string;
+          adminArea2: string;
+          adminArea1: string;
+          postalCode: string;
+          countryCode: string;
+        };
+      };
+    },
+  ) {
+    return this.paypalService.storeCardInVault(body.customerId, body.card);
+  }
+
+  // List saved cards
+  @Get('vault/:customerId')
+  async listCards(@Param('customerId') customerId: string) {
+    return this.paypalService.listVaultedCards(customerId);
   }
 }

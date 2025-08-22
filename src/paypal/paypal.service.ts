@@ -9,6 +9,7 @@ import {
   OrderCaptureRequest,
   OrderRequest,
   OrdersController,
+  VaultController,
 } from '@paypal/paypal-server-sdk';
 
 @Injectable()
@@ -80,6 +81,54 @@ export class PaypalService {
       if (error instanceof ApiError) {
         throw new BadRequestException(error);
       }
+    }
+  }
+
+  async storeCardInVault(
+    userId: string,
+    card: {
+      number: string;
+      expiry: string;
+      securityCode: string;
+      name: string;
+      billingAddress: {
+        addressLine1: string;
+        adminArea2: string;
+        adminArea1: string;
+        postalCode: string;
+        countryCode: string;
+      };
+    },
+  ) {
+    const request = new VaultController(this.client);
+
+    try {
+      const response = await request.createPaymentToken({
+        body: {
+          customer: { merchantCustomerId: userId }, // your own user id mapping
+          paymentSource: {
+            card: {
+              ...card,
+            },
+          },
+        },
+      });
+
+      return response.result; // contains vault token
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+
+  async listVaultedCards(customerId: string) {
+    const request = new VaultController(this.client);
+
+    try {
+      const response = await request.listCustomerPaymentTokens({ customerId });
+
+      return response.result; // array of vaulted methods
+    } catch (error) {
+      throw new BadRequestException(error);
     }
   }
 }
