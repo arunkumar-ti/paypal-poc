@@ -105,7 +105,7 @@ export class PaypalService {
     try {
       const response = await request.createPaymentToken({
         body: {
-          customer: { merchantCustomerId: userId }, // your own user id mapping
+          customer: { id: userId }, // your own user id mapping
           paymentSource: {
             card: {
               ...card,
