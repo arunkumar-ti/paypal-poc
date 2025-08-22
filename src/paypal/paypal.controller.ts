@@ -89,4 +89,10 @@ export class PaypalController {
   async listCards(@Param('customerId') customerId: string) {
     return this.paypalService.listVaultedCards(customerId);
   }
+
+  // Pay using a vaulted card
+  @Post('vault/pay')
+  async payWithCard(@Body() body: { vaultId: string; amount: string }) {
+    return this.paypalService.payWithVaultedCard(body.vaultId, body.amount);
+  }
 }

@@ -11,6 +11,7 @@ import {
   OrdersController,
   VaultController,
 } from '@paypal/paypal-server-sdk';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class PaypalService {
@@ -129,6 +130,37 @@ export class PaypalService {
       return response.result; // array of vaulted methods
     } catch (error) {
       throw new BadRequestException(error);
+    }
+  }
+
+  async payWithVaultedCard(vaultId: string, amount: string) {
+    const request = new OrdersController(this.client);
+
+    try {
+      const data = await request.createOrder({
+        paypalRequestId: `ORDER-${new Date().getTime()}-${randomUUID()}`,
+        body: {
+          intent: CheckoutPaymentIntent.Capture,
+          purchaseUnits: [
+            {
+              amount: {
+                currencyCode:
+                  this.configService.get('PAYPAL_CURRENCY') || 'USD',
+                value: amount,
+              },
+            },
+          ],
+          paymentSource: {
+            card: { vaultId },
+          },
+        },
+      });
+
+      return data.result;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw new BadRequestException(error);
+      }
     }
   }
 }
