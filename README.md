@@ -56,7 +56,7 @@ npm run test:cov
 ## Project Structure
 
 - `src/paypal/paypal.service.ts` – Main service for PayPal integration
-- `test/paypal.service.spec.ts` – Unit tests for PayPal service
+- `src/paypal/paypal.service.spec.ts` – Unit tests for PayPal service
 
 ## Usage
 
